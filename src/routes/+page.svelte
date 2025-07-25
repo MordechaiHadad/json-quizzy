@@ -79,9 +79,9 @@
             </div>
         </div>
         <div
-            class="bg-white rounded-lg shadow-lg p-8 flex flex-col gap-4 w-full max-w-md min-h-[340px]">
+            class="bg-white rounded-lg shadow-lg p-8 flex flex-col gap-4 w-full max-w-md min-h-[340px] max-h-[340px]">
             <h2 class="text-xl font-bold mb-2">Recent Quizzes</h2>
-            <ul class="flex flex-col gap-3">
+            <ul class="flex flex-col gap-3 overflow-y-auto max-h-64">
                 {#if quizzes.length === 0}
                     <li class="p-3 bg-gray-100 rounded text-gray-500 italic">
                         No recent quizzes
