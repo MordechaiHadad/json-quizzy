@@ -93,7 +93,7 @@
                             <span class="font-semibold text-base"
                                 >{quiz.title}</span>
                             <div class="flex items-center w-full justify-between gap-2 mt-1">
-                                <div class="flex gap-0.5 w-full place-items-center">
+                                <div class="flex gap-2.5 w-full place-items-center">
                                 <div
                                     class="flex-1 max-w-1/2 h-2 bg-gray-200 rounded overflow-hidden">
                                     <div
@@ -102,7 +102,7 @@
                                     </div>
                                 </div>
                                 <span
-                                    class="ml-2 text-xs text-gray-600 w-10 text-right"
+                                    class="text-xs text-gray-600 text-right"
                                     >{Math.round(
                                         quiz.successPercentage ?? 0
                                     )}%</span>
