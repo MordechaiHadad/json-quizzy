@@ -92,9 +92,10 @@
                             class="bg-gray-50 rounded p-3 flex flex-col gap-2 border border-gray-100 shadow-sm">
                             <span class="font-semibold text-base"
                                 >{quiz.title}</span>
-                            <div class="flex items-center gap-2 mt-1">
+                            <div class="flex items-center w-full justify-between gap-2 mt-1">
+                                <div class="flex gap-0.5 w-full place-items-center">
                                 <div
-                                    class="flex-1 h-2 bg-gray-200 rounded overflow-hidden">
+                                    class="flex-1 max-w-1/2 h-2 bg-gray-200 rounded overflow-hidden">
                                     <div
                                         class="h-2 bg-blue-400"
                                         style={`width: ${Math.round(quiz.successPercentage ?? 0)}%`}>
@@ -105,6 +106,8 @@
                                     >{Math.round(
                                         quiz.successPercentage ?? 0
                                     )}%</span>
+
+                                </div>
                                 <button
                                     class="ml-4 px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded"
                                     onclick={async () => {
