@@ -1,8 +1,11 @@
-@import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;700&display=swap");
 @import "@fontsource/roboto";
+@import "tailwindcss";
 
-@theme {
-    --font-sans: "Roboto", sans-serif;
+@layer base {
+    html {
+        font-family: "Noto Sans Arabic", "Roboto", sans-serif;
+    }
 }
 
 button {
