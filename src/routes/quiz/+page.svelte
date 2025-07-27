@@ -146,12 +146,14 @@
                 {#each question.answers as ans}
                     <button
                         onclick={() => select(ans)}
-                        class="px-4 py-2 border rounded text-left {showExp &&
-                        ans === selected
+                        class="px-4 py-2 border rounded text-left
+                        {showExp && ans === selected
                             ? ans.isCorrect
                                 ? 'bg-green-100'
                                 : 'bg-red-100'
-                            : 'bg-white hover:bg-gray-100'}">
+                            : showExp && !selected?.isCorrect && ans.isCorrect
+                                ? 'border-2 border-green-500'
+                                : 'bg-white hover:bg-gray-100'}">
                         {ans.text}
                     </button>
                 {/each}
