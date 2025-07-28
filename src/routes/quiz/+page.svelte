@@ -17,6 +17,8 @@
     let loading = $state(true);
     let question = $derived.by(() => quiz.questions[current]);
     let autoNextTimeout: ReturnType<typeof setTimeout> | null = null;
+let startTime = $state<number | null>(null);
+let elapsed = $state(0);
 
     async function saveQuizResult() {
         if (!context.db) {
@@ -75,6 +77,9 @@
         } else {
             await saveQuizResult();
             finished = true;
+            if (startTime) {
+                elapsed = Math.floor((Date.now() - startTime) / 1000);
+            }
             context.quiz = {
                 questions: [],
                 title: "",
@@ -105,6 +110,7 @@
         quiz.id = context.quiz.id;
         quiz.successPercentage = context.quiz.successPercentage;
         loading = false;
+        startTime = Date.now();
     });
 </script>
 
@@ -187,6 +193,7 @@
         <h3 class="text-3xl">
             Accuracy: {Math.round((score / quiz.questions.length) * 100)}%
         </h3>
+        <div class="text-xl font-semibold text-gray-700">Time: {Math.floor(elapsed / 60)}:{(elapsed % 60).toString().padStart(2, '0')}</div>
         <button
             onclick={async () => await goto("/")}
             class="mt-6 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg rounded">
