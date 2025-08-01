@@ -99,7 +99,7 @@
                 model: "gemini-2.5-flash",
                 contents: `Here are a few I answered incorrectly please provide corrections for these questions, a few rules for you to follow:
 1. Provide a concise answer.
-2. Why the chosen answer is incorrect.
+2. Why the chosen answer is incorrect, and why the correct answer is correct.
 3. Return the answer in this JSON format: { "question": "The question", "answer": "The answer", "explanation": "Your generated explanation" }.
 
 The questions I answered incorrectly are as follows:\n\n${JSON.stringify(wrongCollector, null, 2)}`,
