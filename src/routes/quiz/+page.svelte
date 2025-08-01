@@ -99,7 +99,8 @@
                 model: "gemini-2.5-flash",
                 contents: `Here are a few I answered incorrectly please provide corrections for these questions, a few rules for you to follow:
 1. Provide a concise answer.
-2. Return the answer in this JSON format: { "question": "The question", "answer": "The answer", "explanation": "Your generated explanation" }.
+2. Why the chosen answer is incorrect.
+3. Return the answer in this JSON format: { "question": "The question", "answer": "The answer", "explanation": "Your generated explanation" }.
 
 The questions I answered incorrectly are as follows:\n\n${JSON.stringify(wrongCollector, null, 2)}`,
             });
@@ -267,13 +268,14 @@ The questions I answered incorrectly are as follows:\n\n${JSON.stringify(wrongCo
                     Corrections & Explanations
                 </h4>
                 <ul class="space-y-4 overflow-y-auto max-h-96 @3xl:max-h-[40rem]">
-                    {#each geminiExplanations as item}
+                    {#each geminiExplanations as item, i}
                         <li class="p-4 bg-gray-100 rounded">
                             <div class="font-semibold">Q: {item.question}</div>
                             <div class="text-blue-700">A: {item.answer}</div>
-                            <div class="mt-2 text-gray-700">
-                                {item.explanation}
-                            </div>
+                            {#if wrongCollector[i]?.chosen}
+                                <div class="text-red-600">Your answer: {wrongCollector[i].chosen}</div>
+                            {/if}
+                            <div class="mt-2 text-gray-700">{item.explanation}</div>
                         </li>
                     {/each}
                 </ul>
