@@ -1,3 +1,4 @@
+import type { GoogleGenAI } from "@google/genai";
 import type Database from "@tauri-apps/plugin-sql";
 
 export type Answer = {
@@ -23,5 +24,12 @@ export type Quiz = {
 
 export type Context = {
     quiz: Quiz;
-    db: Database | null;
+    db?: Database;
+    gemini?: GoogleGenAI;
+}
+
+export type GeminiResponse = {
+    question: string;
+    answer: string;
+    explanation: string;
 }

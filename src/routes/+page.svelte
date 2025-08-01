@@ -90,7 +90,7 @@
                     {#each quizzes as quiz}
                         <li
                             class="bg-gray-50 rounded p-3 flex flex-col gap-2 border border-gray-100 shadow-sm">
-                            <span class="font-semibold text-base"
+                            <span class="font-semibold text-sm @3xl:text-base"
                                 >{quiz.title}</span>
                             <div class="flex items-center w-full justify-between gap-2 mt-1">
                                 <div class="flex gap-2.5 w-full place-items-center">

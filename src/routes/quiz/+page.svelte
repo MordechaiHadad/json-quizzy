@@ -1,6 +1,6 @@
 <script lang="ts">
     import { getContext, onMount } from "svelte";
-    import type { Quiz, Answer, Context } from "$lib/index";
+    import type { Quiz, Answer, Context, GeminiResponse } from "$lib/index";
     import { goto } from "$app/navigation";
 
     const context = getContext<Context>("quiz");
@@ -17,8 +17,15 @@
     let loading = $state(true);
     let question = $derived.by(() => quiz.questions[current]);
     let autoNextTimeout: ReturnType<typeof setTimeout> | null = null;
-let startTime = $state<number | null>(null);
-let elapsed = $state(0);
+    let startTime = $state<number | null>(null);
+    let elapsed = $state(0);
+    let wrongCollector = $state<
+        Array<{ question: string; chosen: string; correct: string }>
+    >([]);
+    let geminiExplanations = $state<
+        Array<{ question: string; answer: string; explanation: string }>
+    >([]);
+    let geminiLoading = $state(false);
 
     async function saveQuizResult() {
         if (!context.db) {
@@ -63,6 +70,13 @@ let elapsed = $state(0);
         if (ans.isCorrect) {
             score++;
             autoNextTimeout = setTimeout(() => next(), 5000);
+        } else {
+            const correctAns = question.answers.find((a) => a.isCorrect);
+            wrongCollector.push({
+                question: question.question,
+                chosen: ans.text,
+                correct: correctAns ? correctAns.text : "",
+            });
         }
     }
 
@@ -76,10 +90,38 @@ let elapsed = $state(0);
             reset();
         } else {
             await saveQuizResult();
-            finished = true;
-            if (startTime) {
+
+            if (startTime)
                 elapsed = Math.floor((Date.now() - startTime) / 1000);
+            finished = true;
+            geminiLoading = true;
+            let geminiResp = await context.gemini?.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: `Here are a few I answered incorrectly please provide corrections for these questions, a few rules for you to follow:
+1. Provide a concise answer.
+2. Return the answer in this JSON format: { "question": "The question", "answer": "The answer", "explanation": "Your generated explanation" }.
+
+The questions I answered incorrectly are as follows:\n\n${JSON.stringify(wrongCollector, null, 2)}`,
+            });
+            const modifiedText = geminiResp?.text
+                ?.replaceAll("json", "")
+                .replaceAll("`", "");
+            let parsed: Array<{
+                question: string;
+                answer: string;
+                explanation: string;
+            }> = [];
+            try {
+                parsed = JSON.parse(modifiedText ?? "[]");
+            } catch (e) {
+                console.error(
+                    "Failed to parse Gemini response:",
+                    modifiedText,
+                    e
+                );
             }
+            geminiExplanations = parsed;
+            geminiLoading = false;
             context.quiz = {
                 questions: [],
                 title: "",
@@ -158,8 +200,8 @@ let elapsed = $state(0);
                                 ? 'bg-green-100'
                                 : 'bg-red-100'
                             : showExp && !selected?.isCorrect && ans.isCorrect
-                                ? 'border-2 border-green-500'
-                                : 'bg-white hover:bg-gray-100'}">
+                              ? 'border-2 border-green-500'
+                              : 'bg-white hover:bg-gray-100'}">
                         {ans.text}
                     </button>
                 {/each}
@@ -186,14 +228,57 @@ let elapsed = $state(0);
         </div>
     </div>
 {:else}
-    <div class="p-8 flex flex-col items-center justify-center gap-4">
+    <div class="p-8 flex flex-col items-center justify-center gap-4 @container">
         <h2 class="text-4xl font-bold">
             Score: {score}/{quiz.questions.length}
         </h2>
         <h3 class="text-3xl">
             Accuracy: {Math.round((score / quiz.questions.length) * 100)}%
         </h3>
-        <div class="text-xl font-semibold text-gray-700">Time: {Math.floor(elapsed / 60)}:{(elapsed % 60).toString().padStart(2, '0')}</div>
+        <div class="text-xl font-semibold text-gray-700">
+            Time: {Math.floor(elapsed / 60)}:{(elapsed % 60)
+                .toString()
+                .padStart(2, "0")}
+        </div>
+        {#if geminiLoading}
+            <div class="flex flex-col items-center justify-center">
+                <svg
+                    class="animate-spin h-12 w-12 text-blue-500 mb-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    ><circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"></circle
+                    ><path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path
+                    ></svg>
+                <div class="text-lg">Generating explanations...</div>
+            </div>
+        {:else if geminiExplanations.length > 0}
+            <div class="w-full max-w-2xl">
+                <h4 class="text-2xl font-bold mb-4 text-center @3xl:text-left">
+                    Corrections & Explanations
+                </h4>
+                <ul class="space-y-4 overflow-y-auto max-h-96 @3xl:max-h-[40rem]">
+                    {#each geminiExplanations as item}
+                        <li class="p-4 bg-gray-100 rounded">
+                            <div class="font-semibold">Q: {item.question}</div>
+                            <div class="text-blue-700">A: {item.answer}</div>
+                            <div class="mt-2 text-gray-700">
+                                {item.explanation}
+                            </div>
+                        </li>
+                    {/each}
+                </ul>
+            </div>
+        {/if}
         <button
             onclick={async () => await goto("/")}
             class="mt-6 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg rounded">
